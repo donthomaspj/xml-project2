@@ -1,0 +1,99 @@
+﻿<!--
+    Name : Don Thomas
+    Purpose : Xml Project 2
+    Date : 08/04/2021
+-->
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <!--Style-->
+    <style type="text/css">
+        h1 {
+            font-family: Verdana;
+            font-size: 24pt;
+        }
+
+        h2 {
+            font-family: Verdana;
+            font-size: 18pt;
+        }
+
+        input, button {
+            font-family: Verdana;
+            font-size: 14pt;
+        }
+    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+    <title>Transit Stops in London , Ontario</title>
+
+</head>
+
+<body>
+    <!--Headings-->
+    <h1>Transit Stops in London , Ontario</h1>
+    <h2>Enter a route number and/or street, or leave blank</h2>
+    <input type="text" id="characterInput" />
+    <input type="text" id="characterInput2" />
+    <input type="submit" value="Submit" onclick="RenderXSLT()" />
+    <!--div for output-->
+    <div id="xsltOutputContainer"></div>
+
+    <script type="text/javascript">
+        //fn onloaded
+        function loadXMLDoc(filename) {
+            if (window.ActiveXObject) {
+                xhttp = new ActiveXObject("Msxml2.XMLHTTP");
+            }
+            else {
+                xhttp = new XMLHttpRequest();
+            }
+            xhttp.open("GET", filename, false);
+
+            try {
+                xhttp.responseType = "msxml-document"
+            }
+            catch (err) { }
+            xhttp.send("");
+            return xhttp.responseXML;
+        }
+        //fn rendering
+        function RenderXSLT() {
+            xml = loadXMLDoc("ltc-stops-inventory.xml");
+            xslt = loadXMLDoc("XSLTFile1.xslt");
+
+            var characterName = document.getElementById("characterInput").value;
+            characterName = characterName.toUpperCase();
+
+            var characterName2 = document.getElementById("characterInput2").value;
+
+            if (window.ActiveXObject || xhttp.responseType == "msxml-document") {
+                var template = new ActiveXObject("Msxml2.XslTemplate.6.0");
+                template.stylesheet = xslt;
+
+                var proc = template.createProcessor();
+                proc.input = xml;
+                proc.addParameter("number", characterName);
+                proc.addParameter("streetName", characterName2);
+
+                proc.transform();
+                document.getElementById("xsltOutputContainer").innerHTML = proc.output;
+            }
+            else if (typeof XSLTProcessor !== 'undefined') {
+                var xsltProcessor = new XSLTProcessor();
+                xsltProcessor.importStylesheet(xslt);
+
+                xsltProcessor.setParameter(null, "number", characterName);
+                xsltProcessor.setParameter(null, "streetName", characterName2);
+
+                var resultDocument = xsltProcessor.transformToFragment(xml, document);
+                document.getElementById("xsltOutputContainer").innerHTML = "";
+                document.getElementById("xsltOutputContainer").appendChild(resultDocument);
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
